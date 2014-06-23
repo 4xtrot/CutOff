@@ -1,0 +1,324 @@
+
+CutOff.elf:     file format elf32-avr
+
+Sections:
+Idx Name          Size      VMA       LMA       File off  Algn
+  0 .text         00000190  00000000  00000000  00000074  2**1
+                  CONTENTS, ALLOC, LOAD, READONLY, CODE
+  1 .bss          00000003  00800060  00800060  00000204  2**0
+                  ALLOC
+  2 .stab         000006b4  00000000  00000000  00000204  2**2
+                  CONTENTS, READONLY, DEBUGGING
+  3 .stabstr      00000085  00000000  00000000  000008b8  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  4 .debug_aranges 00000020  00000000  00000000  0000093d  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  5 .debug_pubnames 00000050  00000000  00000000  0000095d  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  6 .debug_info   000001d1  00000000  00000000  000009ad  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  7 .debug_abbrev 00000135  00000000  00000000  00000b7e  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  8 .debug_line   00000223  00000000  00000000  00000cb3  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  9 .debug_frame  00000030  00000000  00000000  00000ed8  2**2
+                  CONTENTS, READONLY, DEBUGGING
+ 10 .debug_str    0000013e  00000000  00000000  00000f08  2**0
+                  CONTENTS, READONLY, DEBUGGING
+ 11 .debug_pubtypes 00000038  00000000  00000000  00001046  2**0
+                  CONTENTS, READONLY, DEBUGGING
+
+Disassembly of section .text:
+
+00000000 <__vectors>:
+   0:	09 c0       	rjmp	.+18     	; 0x14 <__ctors_end>
+   2:	16 c0       	rjmp	.+44     	; 0x30 <__bad_interrupt>
+   4:	15 c0       	rjmp	.+42     	; 0x30 <__bad_interrupt>
+   6:	14 c0       	rjmp	.+40     	; 0x30 <__bad_interrupt>
+   8:	13 c0       	rjmp	.+38     	; 0x30 <__bad_interrupt>
+   a:	12 c0       	rjmp	.+36     	; 0x30 <__bad_interrupt>
+   c:	11 c0       	rjmp	.+34     	; 0x30 <__bad_interrupt>
+   e:	10 c0       	rjmp	.+32     	; 0x30 <__bad_interrupt>
+  10:	0f c0       	rjmp	.+30     	; 0x30 <__bad_interrupt>
+  12:	0f c0       	rjmp	.+30     	; 0x32 <__vector_9>
+
+00000014 <__ctors_end>:
+  14:	11 24       	eor	r1, r1
+  16:	1f be       	out	0x3f, r1	; 63
+  18:	cf e9       	ldi	r28, 0x9F	; 159
+  1a:	cd bf       	out	0x3d, r28	; 61
+
+0000001c <__do_clear_bss>:
+  1c:	10 e0       	ldi	r17, 0x00	; 0
+  1e:	a0 e6       	ldi	r26, 0x60	; 96
+  20:	b0 e0       	ldi	r27, 0x00	; 0
+  22:	01 c0       	rjmp	.+2      	; 0x26 <.do_clear_bss_start>
+
+00000024 <.do_clear_bss_loop>:
+  24:	1d 92       	st	X+, r1
+
+00000026 <.do_clear_bss_start>:
+  26:	a3 36       	cpi	r26, 0x63	; 99
+  28:	b1 07       	cpc	r27, r17
+  2a:	e1 f7       	brne	.-8      	; 0x24 <.do_clear_bss_loop>
+  2c:	2e d0       	rcall	.+92     	; 0x8a <main>
+  2e:	ae c0       	rjmp	.+348    	; 0x18c <_exit>
+
+00000030 <__bad_interrupt>:
+  30:	e7 cf       	rjmp	.-50     	; 0x0 <__vectors>
+
+00000032 <__vector_9>:
+
+
+volatile uint8_t adc_counter, voltage, value;
+
+ISR(SIG_ADC)
+{
+  32:	1f 92       	push	r1
+  34:	0f 92       	push	r0
+  36:	0f b6       	in	r0, 0x3f	; 63
+  38:	0f 92       	push	r0
+  3a:	11 24       	eor	r1, r1
+  3c:	2f 93       	push	r18
+  3e:	5f 93       	push	r21
+  40:	6f 93       	push	r22
+  42:	7f 93       	push	r23
+  44:	8f 93       	push	r24
+  46:	9f 93       	push	r25
+  48:	af 93       	push	r26
+  4a:	bf 93       	push	r27
+	value = value + (ADCH*7)/81; //insert 4xtrot. For me U. 1.1V = 22
+  4c:	20 91 61 00 	lds	r18, 0x0061
+  50:	85 b1       	in	r24, 0x05	; 5
+  52:	90 e0       	ldi	r25, 0x00	; 0
+  54:	67 e0       	ldi	r22, 0x07	; 7
+  56:	70 e0       	ldi	r23, 0x00	; 0
+  58:	54 d0       	rcall	.+168    	; 0x102 <__mulhi3>
+  5a:	61 e5       	ldi	r22, 0x51	; 81
+  5c:	70 e0       	ldi	r23, 0x00	; 0
+  5e:	6f d0       	rcall	.+222    	; 0x13e <__divmodhi4>
+  60:	26 0f       	add	r18, r22
+  62:	20 93 61 00 	sts	0x0061, r18
+	adc_counter++;
+  66:	80 91 62 00 	lds	r24, 0x0062
+  6a:	8f 5f       	subi	r24, 0xFF	; 255
+  6c:	80 93 62 00 	sts	0x0062, r24
+}
+  70:	bf 91       	pop	r27
+  72:	af 91       	pop	r26
+  74:	9f 91       	pop	r25
+  76:	8f 91       	pop	r24
+  78:	7f 91       	pop	r23
+  7a:	6f 91       	pop	r22
+  7c:	5f 91       	pop	r21
+  7e:	2f 91       	pop	r18
+  80:	0f 90       	pop	r0
+  82:	0f be       	out	0x3f, r0	; 63
+  84:	0f 90       	pop	r0
+  86:	1f 90       	pop	r1
+  88:	18 95       	reti
+
+0000008a <main>:
+
+int main(void)
+{
+DDRB = 0b00011011;
+  8a:	8b e1       	ldi	r24, 0x1B	; 27
+  8c:	87 bb       	out	0x17, r24	; 23
+PORTB = 0b00000000; //all (excluded PB4 (ADC)) as out
+  8e:	18 ba       	out	0x18, r1	; 24
+
+MCUCR |= _BV(SM1); //power-down setup
+  90:	85 b7       	in	r24, 0x35	; 53
+  92:	80 61       	ori	r24, 0x10	; 16
+  94:	85 bf       	out	0x35, r24	; 53
+
+ADMUX |= /*(1 << MUX1)|*/(1 << MUX0);  //select ADC1 (PB2) input
+  96:	38 9a       	sbi	0x07, 0	; 7
+ADMUX = ADMUX | (1<<REFS0); //internal refefrence 1.1V
+  98:	3e 9a       	sbi	0x07, 6	; 7
+ADMUX = ADMUX|(1<<ADLAR); //left put conversion result
+  9a:	3d 9a       	sbi	0x07, 5	; 7
+ADCSRA |= (1 << ADEN) //enable
+  9c:	86 b1       	in	r24, 0x06	; 6
+  9e:	8e 68       	ori	r24, 0x8E	; 142
+  a0:	86 b9       	out	0x06, r24	; 6
+       |(1 << ADPS2)|(1 << ADPS1) //prescaller?
+	   |(1 << ADIE); //allow interupt
+ACSR |= (1 << ACD); //disable comparator
+  a2:	47 9a       	sbi	0x08, 7	; 8
+DIDR0 |= (1 << ADC1D); //input analog
+  a4:	a2 9a       	sbi	0x14, 2	; 20
+ADCSRA = ADCSRA|(1<<ADSC); //start conversion
+  a6:	36 9a       	sbi	0x06, 6	; 6
+
+sei(); 
+  a8:	78 94       	sei
+
+
+//turn on voltage as default
+PORTB |= _BV(PB4); 
+  aa:	c4 9a       	sbi	0x18, 4	; 24
+value++; //only one time
+  ac:	80 91 61 00 	lds	r24, 0x0061
+  b0:	8f 5f       	subi	r24, 0xFF	; 255
+  b2:	80 93 61 00 	sts	0x0061, r24
+
+while(1)
+{
+	ADCSRA |= (1 << ADSC); 
+  b6:	36 9a       	sbi	0x06, 6	; 6
+	#else
+		//round up by default
+		__ticks_dc = (uint32_t)(ceil(fabs(__tmp)));
+	#endif
+
+	__builtin_avr_delay_cycles(__ticks_dc);
+  b8:	8f ef       	ldi	r24, 0xFF	; 255
+  ba:	96 e7       	ldi	r25, 0x76	; 118
+  bc:	a1 e0       	ldi	r26, 0x01	; 1
+  be:	81 50       	subi	r24, 0x01	; 1
+  c0:	90 40       	sbci	r25, 0x00	; 0
+  c2:	a0 40       	sbci	r26, 0x00	; 0
+  c4:	e1 f7       	brne	.-8      	; 0xbe <__stack+0x1f>
+  c6:	00 c0       	rjmp	.+0      	; 0xc8 <__stack+0x29>
+  c8:	00 00       	nop
+    _delay_ms(50);
+
+if(adc_counter > 10)  //adc_counter links to value voltage
+  ca:	80 91 62 00 	lds	r24, 0x0062
+  ce:	8b 30       	cpi	r24, 0x0B	; 11
+  d0:	58 f0       	brcs	.+22     	; 0xe8 <__stack+0x49>
+{
+	voltage = value/adc_counter;
+  d2:	80 91 61 00 	lds	r24, 0x0061
+  d6:	60 91 62 00 	lds	r22, 0x0062
+  da:	25 d0       	rcall	.+74     	; 0x126 <__udivmodqi4>
+  dc:	80 93 60 00 	sts	0x0060, r24
+	adc_counter = 0;
+  e0:	10 92 62 00 	sts	0x0062, r1
+	value = 0;
+  e4:	10 92 61 00 	sts	0x0061, r1
+//	MCUCR |= _BV(SE); //power-down
+//}
+
+//or
+
+if(voltage <= 4 && value == 0 /*for first pass (value=1)*/){
+  e8:	80 91 60 00 	lds	r24, 0x0060
+  ec:	85 30       	cpi	r24, 0x05	; 5
+  ee:	18 f7       	brcc	.-58     	; 0xb6 <__stack+0x17>
+  f0:	80 91 61 00 	lds	r24, 0x0061
+  f4:	88 23       	and	r24, r24
+  f6:	f9 f6       	brne	.-66     	; 0xb6 <__stack+0x17>
+    /*if(counter_down++ > 5)*/{
+		PORTB &= ~_BV(PB4);	//turn off power
+  f8:	c4 98       	cbi	0x18, 4	; 24
+		MCUCR |= _BV(SE); //power-down
+  fa:	85 b7       	in	r24, 0x35	; 53
+  fc:	80 62       	ori	r24, 0x20	; 32
+  fe:	85 bf       	out	0x35, r24	; 53
+ 100:	da cf       	rjmp	.-76     	; 0xb6 <__stack+0x17>
+
+00000102 <__mulhi3>:
+ 102:	55 27       	eor	r21, r21
+ 104:	00 24       	eor	r0, r0
+
+00000106 <__mulhi3_loop>:
+ 106:	80 ff       	sbrs	r24, 0
+ 108:	02 c0       	rjmp	.+4      	; 0x10e <__mulhi3_skip1>
+ 10a:	06 0e       	add	r0, r22
+ 10c:	57 1f       	adc	r21, r23
+
+0000010e <__mulhi3_skip1>:
+ 10e:	66 0f       	add	r22, r22
+ 110:	77 1f       	adc	r23, r23
+ 112:	61 15       	cp	r22, r1
+ 114:	71 05       	cpc	r23, r1
+ 116:	21 f0       	breq	.+8      	; 0x120 <__mulhi3_exit>
+ 118:	96 95       	lsr	r25
+ 11a:	87 95       	ror	r24
+ 11c:	00 97       	sbiw	r24, 0x00	; 0
+ 11e:	99 f7       	brne	.-26     	; 0x106 <__mulhi3_loop>
+
+00000120 <__mulhi3_exit>:
+ 120:	95 2f       	mov	r25, r21
+ 122:	80 2d       	mov	r24, r0
+ 124:	08 95       	ret
+
+00000126 <__udivmodqi4>:
+ 126:	99 1b       	sub	r25, r25
+ 128:	79 e0       	ldi	r23, 0x09	; 9
+ 12a:	04 c0       	rjmp	.+8      	; 0x134 <__udivmodqi4_ep>
+
+0000012c <__udivmodqi4_loop>:
+ 12c:	99 1f       	adc	r25, r25
+ 12e:	96 17       	cp	r25, r22
+ 130:	08 f0       	brcs	.+2      	; 0x134 <__udivmodqi4_ep>
+ 132:	96 1b       	sub	r25, r22
+
+00000134 <__udivmodqi4_ep>:
+ 134:	88 1f       	adc	r24, r24
+ 136:	7a 95       	dec	r23
+ 138:	c9 f7       	brne	.-14     	; 0x12c <__udivmodqi4_loop>
+ 13a:	80 95       	com	r24
+ 13c:	08 95       	ret
+
+0000013e <__divmodhi4>:
+ 13e:	97 fb       	bst	r25, 7
+ 140:	09 2e       	mov	r0, r25
+ 142:	07 26       	eor	r0, r23
+ 144:	0a d0       	rcall	.+20     	; 0x15a <__divmodhi4_neg1>
+ 146:	77 fd       	sbrc	r23, 7
+ 148:	04 d0       	rcall	.+8      	; 0x152 <__divmodhi4_neg2>
+ 14a:	0c d0       	rcall	.+24     	; 0x164 <__udivmodhi4>
+ 14c:	06 d0       	rcall	.+12     	; 0x15a <__divmodhi4_neg1>
+ 14e:	00 20       	and	r0, r0
+ 150:	1a f4       	brpl	.+6      	; 0x158 <__divmodhi4_exit>
+
+00000152 <__divmodhi4_neg2>:
+ 152:	70 95       	com	r23
+ 154:	61 95       	neg	r22
+ 156:	7f 4f       	sbci	r23, 0xFF	; 255
+
+00000158 <__divmodhi4_exit>:
+ 158:	08 95       	ret
+
+0000015a <__divmodhi4_neg1>:
+ 15a:	f6 f7       	brtc	.-4      	; 0x158 <__divmodhi4_exit>
+ 15c:	90 95       	com	r25
+ 15e:	81 95       	neg	r24
+ 160:	9f 4f       	sbci	r25, 0xFF	; 255
+ 162:	08 95       	ret
+
+00000164 <__udivmodhi4>:
+ 164:	aa 1b       	sub	r26, r26
+ 166:	bb 1b       	sub	r27, r27
+ 168:	51 e1       	ldi	r21, 0x11	; 17
+ 16a:	07 c0       	rjmp	.+14     	; 0x17a <__udivmodhi4_ep>
+
+0000016c <__udivmodhi4_loop>:
+ 16c:	aa 1f       	adc	r26, r26
+ 16e:	bb 1f       	adc	r27, r27
+ 170:	a6 17       	cp	r26, r22
+ 172:	b7 07       	cpc	r27, r23
+ 174:	10 f0       	brcs	.+4      	; 0x17a <__udivmodhi4_ep>
+ 176:	a6 1b       	sub	r26, r22
+ 178:	b7 0b       	sbc	r27, r23
+
+0000017a <__udivmodhi4_ep>:
+ 17a:	88 1f       	adc	r24, r24
+ 17c:	99 1f       	adc	r25, r25
+ 17e:	5a 95       	dec	r21
+ 180:	a9 f7       	brne	.-22     	; 0x16c <__udivmodhi4_loop>
+ 182:	80 95       	com	r24
+ 184:	90 95       	com	r25
+ 186:	bc 01       	movw	r22, r24
+ 188:	cd 01       	movw	r24, r26
+ 18a:	08 95       	ret
+
+0000018c <_exit>:
+ 18c:	f8 94       	cli
+
+0000018e <__stop_program>:
+ 18e:	ff cf       	rjmp	.-2      	; 0x18e <__stop_program>
